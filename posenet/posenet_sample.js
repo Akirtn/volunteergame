@@ -25,8 +25,8 @@ const imageScaleFactor = 0.2;
 const outputStride = 16;
 const flipHorizontal = false;
 const stats = new Stats();
-const contentWidth = 800;
-const contentHeight = 600;
+const SCREEN_WIDTH = 800;
+const SCREEN_HEIGHT = 600;
 const ballNum = 2;
 const colors = ["red","blue","green"];
 const fontLayout = "bold 50px Arial";
@@ -42,9 +42,11 @@ balls = initBalls(ballNum);
 bindPage();
 
 async function bindPage() {
+     // posenetの呼び出し
     const net = await posenet.load();
     let video;
     try {
+         // video属性をロード
         video = await loadVideo();
     } catch(e) {
         console.error(e);
@@ -54,11 +56,13 @@ async function bindPage() {
 }
 
 async function loadVideo() {
+    // カメラのセットアップ
     const video = await setupCamera();
     video.play();
     return video;
 }
-
+// カメラのセットアップ
+// video属性からストリームを取得する
 async function setupCamera() {
     const video = document.getElementById('video');
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -78,7 +82,8 @@ async function setupCamera() {
         return Promise.reject(errorMessage);
     }
 }
-
+// 取得したストリームをestimateSinglePose()に渡して姿勢予測を実行
+// requestAnimationFrameによってフレームを再描画し続ける
 function detectPoseInRealTime(video, net) {
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -90,12 +95,12 @@ function detectPoseInRealTime(video, net) {
         const pose = await net.estimateSinglePose(video, imageScaleFactor, flipHorizontal, outputStride);
         poses.push(pose);
 
-        ctx.clearRect(0, 0, contentWidth,contentHeight);
+        ctx.clearRect(0, 0, SCREEN_WIDTH,SCREEN_HEIGHT);
 
         ctx.save();
         ctx.scale(-1, 1);
-        ctx.translate(-contentWidth, 0);
-        ctx.drawImage(video, 0, 0, contentWidth, contentHeight);
+        ctx.translate(-SCREEN_WIDTH, 0);
+        ctx.drawImage(video, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         ctx.restore();
 
 	if (timeLimit % 10 == 0) {
@@ -113,7 +118,8 @@ function detectPoseInRealTime(video, net) {
 	    ctx.fill();
 	} else {
             poses.forEach(({ s, keypoints }) => {
-		drawNaviko(keypoints[0],keypoints[1],ctx);
+        drawNaviko(keypoints[0],keypoints[1],ctx);
+        // keypoints[9]には左手、keypoints[10]には右手の予測結果が格納されている 
 		drawWristPoint(keypoints[9],ctx);
 		drawWristPoint(keypoints[10],ctx);
 		ballsDecision(ctx,[keypoints[9],keypoints[10]]);
@@ -135,7 +141,7 @@ function detectPoseInRealTime(video, net) {
     }
     poseDetectionFrame();
 }
-
+// 与えられたKeypointをcanvasに描画する
 function drawWristPoint(wrist,ctx){
     ctx.beginPath();
     ctx.arc(wrist.position.x , wrist.position.y, 3, 0, 2 * Math.PI);
@@ -154,7 +160,7 @@ function drawNaviko(nose, leye, ctx){
 function ballsDecision(ctx,wrists){
     for(i=0;i<ballNum;i++){
         balls[i].y += 30;
-        if (balls[i].y > contentHeight) {
+        if (balls[i].y > SCREEN_HEIGHT) {
             balls[i] = resetBall();
             return;
         }  else {
@@ -175,7 +181,7 @@ function ballsDecision(ctx,wrists){
 
 function resetBall(){
     color = Math.floor(Math.random()*3);
-    return {color:colors[color], x:Math.floor(Math.random()*(contentWidth  - 50) + 50), y:0}
+    return {color:colors[color], x:Math.floor(Math.random()*(SCREEN_WIDTH  - 50) + 50), y:0}
 }
 
 function initBalls(n=2){

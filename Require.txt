@@ -1,0 +1,4 @@
+human hand up and down
+if the human down his hand game character move down.
+character auto move slideways.
+if the right hand y coordinate is bigger than right elbow.
