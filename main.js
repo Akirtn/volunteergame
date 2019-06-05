@@ -108,6 +108,7 @@ if (timeLimit == 0) {
         poses.forEach(({ s, keypoints }) => {
   drawNaviko(keypoints[0],keypoints[1],ctx);
   // keypoints[9]には左手、keypoints[10]には右手の予測結果が格納されている 
+  //if you want to know detail about  keipoints nubmer pleasesee https://github.com/tensorflow/tfjs-models/tree/master/posenet 
   drawWristPoint(keypoints[9],ctx);
   drawWristPoint(keypoints[10],ctx);
   ballsDecision(ctx,[keypoints[9],keypoints[10]]);
